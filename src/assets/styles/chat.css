@@ -1,0 +1,28 @@
+.bton {
+  height: 50px;
+  width: 50px;
+  border-radius: 25px;
+}
+
+.msg-area {
+  width: 100%;
+  height: 90px;
+}
+
+input {
+  background-color: rgb(49, 65, 71);
+  border-style: none;
+  outline: none;
+}
+
+.icon {
+  height: 30px;
+  width: 30px;
+}
+
+.chat-app,
+.chat-name,
+.splitter {
+  border-color: gray;
+}
+

@@ -1,0 +1,23 @@
+.register {
+  height: 500px;
+  width: 400px;
+}
+
+.tick {
+  margin-top: 4px;
+  margin-left: 5px;
+}
+
+.registeri:focus {
+  border-bottom: solid white 1px;
+}
+
+.registeri:hover {
+  border-bottom: solid white 1px;
+}
+
+@media only screen and (max-width: 490px) {
+  .register {
+    width: 80%;
+  }
+}

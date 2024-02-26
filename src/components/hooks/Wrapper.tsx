@@ -9,17 +9,19 @@ interface myProps {
 }
 
 const Wrapper: React.FC<myProps> = ({ children }) => {
+ 
   const location = useLocation();
   const navigate = useNavigate();
   const { isAuthorized } = useSelector((state: RootState) => state.auth);
   const dispatch: AppDispatch = useDispatch();
 
   useEffect(() => {
+    
     if (!isAuthorized) {
       dispatch(setRedirected(location.pathname));
       navigate("/");
     }
-  }, []);
+  }, [isAuthorized,location.pathname]);
 
   return <>{isAuthorized && children}</>;
 };

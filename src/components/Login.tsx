@@ -84,6 +84,7 @@ const Login: React.FC = () => {
           />
           <input
             value={password}
+            autoComplete="current-password"
             onChange={(e) => {
               setpassword(e.target.value);
             }}

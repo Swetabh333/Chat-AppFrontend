@@ -1,6 +1,6 @@
 import "./App.css";
-import Chat from "./components/Chat";
-import Login from "./components/Login";
+import Chat from "./components/Chat.tsx";
+import Login from "./components/Login.tsx";
 import Register from "./components/Register.tsx";
 import Wrapper from "./components/hooks/Wrapper.tsx";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";

@@ -1,4 +1,10 @@
-import React, { useEffect, useState, FormEvent, useRef,MutableRefObject } from "react";
+import React, {
+  useEffect,
+  useState,
+  FormEvent,
+  useRef,
+  MutableRefObject,
+} from "react";
 import "../assets/styles/chat.css";
 import { RootState } from "../state/store";
 import { useSelector } from "react-redux";
@@ -12,19 +18,19 @@ const Chat: React.FC = () => {
     [key: string]: string;
   };
   interface messagesInt {
-    text: string,
-    isOur: boolean,
-    _id:string | number,
-    sender:string,
-    recipient:string,
-    createdAt:string,
-    updatedAt:string
+    text: string;
+    isOur: boolean;
+    _id: string | number;
+    sender: string;
+    recipient: string;
+    createdAt: string;
+    updatedAt: string;
   }
 
-  interface messagesInt2{
-    text:string,
-    isOur:boolean,
-    _id:string | number
+  interface messagesInt2 {
+    text: string;
+    isOur: boolean;
+    _id: string | number;
   }
 
   type onlineArray = {
@@ -32,16 +38,15 @@ const Chat: React.FC = () => {
     username: string;
   };
 
-  type messageType ={
-    recipient:string,
-    sender:string
-  }
+  type messageType = {
+    recipient: string;
+    sender: string;
+  };
 
   type offlineUser = {
-    _id:string,
-    username:string
-  }
-
+    _id: string;
+    username: string;
+  };
 
   const { user } = useSelector((state: RootState) => state.auth);
   const [ws, setWs] = useState<WebSocket | null>(null);
@@ -50,11 +55,8 @@ const Chat: React.FC = () => {
   const [selectedUserId, setSelectedUserId] = useState<string>("");
   const [newMessage, setNewMessage] = useState<string>("");
   const [messages, setMessages] = useState<(messagesInt | messagesInt2)[]>([]);
-  const messageRef:MutableRefObject<HTMLDivElement | null> = useRef(null);
+  const messageRef: MutableRefObject<HTMLDivElement | null> = useRef(null);
   const navigate = useNavigate();
-  useEffect(() => {
-    connectToWs();
-  }, []);
 
   //To reconnect to the socket in case it closes.
 
@@ -64,8 +66,9 @@ const Chat: React.FC = () => {
     navigate("/");
   };
 
-  const connectToWs = () => {
+  const connectToWs = async () => {
     const ws = new WebSocket("ws://localhost:5000");
+
     setWs(ws);
     ws.addEventListener("message", handleOnline);
     ws.addEventListener("close", () => {
@@ -74,6 +77,11 @@ const Chat: React.FC = () => {
       }, 1000);
     });
   };
+
+  useEffect(() => {
+    connectToWs();
+  }, []);
+
   useEffect(() => {
     const div = messageRef.current as HTMLDivElement;
     div?.scrollIntoView({ behavior: "smooth", block: "end" });
@@ -84,7 +92,7 @@ const Chat: React.FC = () => {
       axiosInstance.get(`/api/messages/${selectedUserId}`).then((res) => {
         const { data } = res;
         setMessages(() => [
-          ...data.map((message:messageType) => ({
+          ...data.map((message: messageType) => ({
             ...message,
             isOur: selectedUserId === message.recipient ? true : false,
           })),
@@ -96,11 +104,11 @@ const Chat: React.FC = () => {
   useEffect(() => {
     axiosInstance.get("/getOffline").then((res) => {
       const offlinePeopleArr = res.data
-        .filter((p:offlineUser) => p.username !== user)
-        .filter((p:offlineUser) => !Object.keys(onlinePeople).includes(p._id));
-      const offlinePpl:{[key:string]:string} = {};
+        .filter((p: offlineUser) => p.username !== user)
+        .filter((p: offlineUser) => !Object.keys(onlinePeople).includes(p._id));
+      const offlinePpl: { [key: string]: string } = {};
       if (offlinePeopleArr) {
-        offlinePeopleArr.forEach((elem:offlineUser) => {
+        offlinePeopleArr.forEach((elem: offlineUser) => {
           offlinePpl[elem._id] = elem.username;
         });
         setOfflinePeople(offlinePpl);
@@ -119,6 +127,10 @@ const Chat: React.FC = () => {
   const handleOnline = (e: MessageEvent) => {
     const msgData = JSON.parse(e.data);
 
+    if (msgData.heartBeatValue) {
+      ws?.send(JSON.stringify({ pong: "pong" }));
+    }
+
     if ("usersOnline" in msgData) {
       showOnline(msgData.usersOnline);
     } else {
@@ -128,8 +140,6 @@ const Chat: React.FC = () => {
       ]);
     }
   };
-
-
 
   const sendMessage = (ev: FormEvent) => {
     ev.preventDefault();
@@ -166,6 +176,7 @@ const Chat: React.FC = () => {
                 if (onlinePeople[e]) {
                   return (
                     <div
+                      key={e}
                       onClick={() => {
                         setSelectedUserId(e);
                       }}
@@ -173,7 +184,6 @@ const Chat: React.FC = () => {
                         "text-white cursor-pointer border-b chat-name flex gap-3" +
                         (selectedUserId === e ? " bg-smoothBlack" : "")
                       }
-                      key={e}
                     >
                       {selectedUserId === e && (
                         <div className="bg-Purple w-2"></div>
@@ -194,6 +204,7 @@ const Chat: React.FC = () => {
             {Object.keys(offlinePeople).map((e) => {
               return (
                 <div
+                  key={e}
                   onClick={() => {
                     setSelectedUserId(e);
                   }}
@@ -201,7 +212,6 @@ const Chat: React.FC = () => {
                     "text-white cursor-pointer border-b chat-name flex gap-3" +
                     (selectedUserId === e ? " bg-smoothBlack" : "")
                   }
-                  key={e}
                 >
                   {selectedUserId === e && (
                     <div className="bg-Purple w-2"></div>
@@ -256,24 +266,25 @@ const Chat: React.FC = () => {
             </div>
           )}
           {!!selectedUserId &&
-            
-            messagesWithoutDupes.map((e: messagesInt | messagesInt2) => {
-              return (
-                <div
-                  key={e._id}
-                  className={"p-3 " + (e.isOur ? "text-right" : "text-left")}
-                >
+            messagesWithoutDupes
+              .filter((msg) => msg && msg._id)
+              .map((e: messagesInt | messagesInt2) => {
+                return (
                   <div
-                    className={
-                      "inline-block text-left text-white p-2 rounded-lg text-wrap " +
-                      (e.isOur ? "bg-Purple" : "bg-smoothBlack")
-                    }
+                    key={e._id}
+                    className={"p-3 " + (e.isOur ? "text-right" : "text-left")}
                   >
-                    {e.text}
+                    <div
+                      className={
+                        "inline-block text-left text-white p-2 rounded-lg text-wrap " +
+                        (e.isOur ? "bg-Purple" : "bg-smoothBlack")
+                      }
+                    >
+                      {e.text}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
           <div ref={messageRef}></div>
         </div>
         {!!selectedUserId && (
@@ -290,7 +301,7 @@ const Chat: React.FC = () => {
             />
             <label className="text-white hover:opacity-60 hover:text-Purple cursor-pointer">
               {/* <input onChange={sendFile} type="file" className="hidden" /> */}
-              <svg
+              {/* <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -303,7 +314,7 @@ const Chat: React.FC = () => {
                   strokeLinejoin="round"
                   d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244"
                 />
-              </svg>
+              </svg>*/}
             </label>
             <button
               type="submit"
